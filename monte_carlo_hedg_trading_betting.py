@@ -2,22 +2,22 @@ import random
 
 def monte_carlo_hedge_simulation(iterations=10000):
     """
-    Монте Карло симулация на футболен хедж с АДАПТИВНА СТРАТЕГИЯ
+    Monte Carlo simulation of football hedge with ADAPTIVE STRATEGY
     """
-    print("🎰 MONTE CARLO ХЕДЖ СИМУЛАЦИЯ (АДАПТИВНА СТРАТЕГИЯ)")
+    print("MONTE CARLO HEDGE SIMULATION (ADAPTIVE STRATEGY)")
     print("=" * 80)
 
-    # Входни данни
-    coef = [float(x) for x in input("Въведете коефициенти (1 X 2): ").split()]
-    bets = [float(x) for x in input("Въведете залози (1 X 2): ").split()]
+    # Input data
+    coef = [float(x) for x in input("Enter odds (1 X 2): ").split()]
+    bets = [float(x) for x in input("Enter bets (1 X 2): ").split()]
 
     total_income = sum(bets)
 
-    print(f"\n📊 ВХОДНИ ДАННИ:")
-    print(f"1: {bets[0]:_} лв @ {coef[0]:_} → Плащане: {bets[0] * coef[0]:_.0f} лв")
-    print(f"X: {bets[1]:_} лв @ {coef[1]:_} → Плащане: {bets[1] * coef[1]:_.0f} лв")
-    print(f"2: {bets[2]:_} лв @ {coef[2]:_} → Плащане: {bets[2] * coef[2]:_.0f} лв")
-    print(f"Общ приход: {total_income:_} лв")
+    print(f"\nINPUT DATA:")
+    print(f"1: {bets[0]:_} at {coef[0]:_} → Payout: {bets[0] * coef[0]:_.0f}")
+    print(f"X: {bets[1]:_} at {coef[1]:_} → Payout: {bets[1] * coef[1]:_.0f}")
+    print(f"2: {bets[2]:_} at {coef[2]:_} → Payout: {bets[2] * coef[2]:_.0f}")
+    print(f"Total income: {total_income:_}")
     print("=" * 80)
 
     wins = 0
@@ -25,44 +25,44 @@ def monte_carlo_hedge_simulation(iterations=10000):
     losses = 0
     total_profit = 0
     results = []
-    strategy_counts = {"ВИСОК КОЕФИЦИЕНТ": 0, "ЛИПСА НА ИЗЯВЕН ФАВОРИТ": 0}
+    strategy_counts = {"HIGH ODDS": 0, "NO CLEAR FAVORITE": 0}
 
-    print(f"\n🔄 Стартиране на {iterations} итерации...")
+    print(f"\nStarting {iterations} iterations...")
 
     for i in range(iterations):
-        # Хеджиращи коефициенти (2% дисконт)
+        # Hedging odds (2% discount)
         hedge_coefs = [coef[0] * 0.98, coef[1] * 0.98, coef[2] * 0.98]
         payouts = [bets[i] * coef[i] for i in range(3)]
 
-        # СТЪПКА 1: ИЗБОР НА СТРАТЕГИЯ (като във втория код)
+        # STEP 1: STRATEGY SELECTION (as in the second code)
         max_coef = max(coef)
         min_payout = min(payouts)
         min_payout_index = payouts.index(min_payout)
 
         if max_coef >= 4:
-            # СТРАТЕГИЯ 1: Базирана на най-висок коефициент
+            # STRATEGY 1: Based on highest odds
             highest_coef_index = coef.index(max_coef)
             cash = payouts[highest_coef_index]
-            strategy_name = "ВИСОК КОЕФИЦИЕНТ"
+            strategy_name = "HIGH ODDS"
             base_index = highest_coef_index
-            strategy_counts["ВИСОК КОЕФИЦИЕНТ"] += 1
+            strategy_counts["HIGH ODDS"] += 1
         else:
-            # СТРАТЕГИЯ 2: Базирана на липса на изявен фаворит
+            # STRATEGY 2: Based on no clear favorite
             cash = min_payout
-            strategy_name = "ЛИПСА НА ИЗЯВЕН ФАВОРИТ"
+            strategy_name = "NO CLEAR FAVORITE"
             base_index = min_payout_index
-            strategy_counts["ЛИПСА НА ИЗЯВЕН ФАВОРИТ"] += 1
+            strategy_counts["NO CLEAR FAVORITE"] += 1
 
         excess = total_income - cash
 
-        # СТЪПКА 2: Изчисляване на дефицитите
+        # STEP 2: Calculate deficits
         deficits = []
         for j in range(3):
             if j != base_index:
                 deficit = payouts[j] - cash
                 deficits.append((j, deficit))
 
-        # СТЪПКА 3: ПОКРИВАНЕ НА ДЕФИЦИТИТЕ С ТОЧНИ СУМИ
+        # STEP 3: COVER DEFICITS WITH EXACT AMOUNTS
         hedge_amounts = [0, 0, 0]
         remaining_excess = excess
 
@@ -72,7 +72,7 @@ def monte_carlo_hedge_simulation(iterations=10000):
                 hedge_amounts[j] = hedge_amount
                 remaining_excess -= hedge_amount
 
-        # СТЪПКА 4: Разпределяне на оставащия излишък
+        # STEP 4: Distribute remaining excess
         if remaining_excess > 0:
             other_outcomes = [i for i in range(3) if i != base_index]
             sum_other_coef = hedge_coefs[other_outcomes[0]] + hedge_coefs[other_outcomes[1]]
@@ -83,11 +83,11 @@ def monte_carlo_hedge_simulation(iterations=10000):
                 additional_hedge = other_coef * base_amount
                 hedge_amounts[j] += additional_hedge
 
-        # СТЪПКА 5: Изчисляване на резултата за случаен изход
+        # STEP 5: Calculate result for random outcome
         total_hedge = sum(hedge_amounts)
         final_cash = total_income - total_hedge
 
-        # Случаен изход от мача
+        # Random match outcome
         random_outcome = random.randint(0, 2)
         payout = payouts[random_outcome]
         hedge_income = hedge_amounts[random_outcome] * hedge_coefs[random_outcome]
@@ -95,73 +95,73 @@ def monte_carlo_hedge_simulation(iterations=10000):
         result = final_cash + hedge_income - payout
         results.append(result)
 
-        # Класификация на резултатите
-        if result > 100:  # ✅ ПЕЧАЛБА (с реалистичен праг)
+        # Result classification
+        if result > 100:  # WIN (with realistic threshold)
             wins += 1
-        elif result >= -100:  # ✅ BREAK-EVEN (малка загуба/печалба)
+        elif result >= -100:  # BREAK-EVEN (small loss/profit)
             break_even += 1
-        else:  # ❌ ЗАГУБА
+        else:  # LOSS
             losses += 1
         
         total_profit += result
 
-    # Статистика
+    # Statistics
     avg_profit = total_profit / iterations
     win_rate = (wins / iterations) * 100
     break_even_rate = (break_even / iterations) * 100
     loss_rate = (losses / iterations) * 100
 
-    print(f"\n📊 РЕЗУЛТАТИ ОТ {iterations} ИТЕРАЦИИ:")
+    print(f"\nRESULTS FROM {iterations} ITERATIONS:")
     print("=" * 50)
-    print(f"✅ Печеливши ситуации: {wins} ({win_rate:.1f}%)")
-    print(f"⚖️  Break-even ситуации: {break_even} ({break_even_rate:.1f}%)")
-    print(f"❌ Загубени ситуации: {losses} ({loss_rate:.1f}%)")
-    print(f"💰 Средна печалба: {avg_profit:_.0f} лв")
-    print(f"📈 Обща печалба: {total_profit:_.0f} лв")
+    print(f"Winning situations: {wins} ({win_rate:.1f}%)")
+    print(f"Break-even situations: {break_even} ({break_even_rate:.1f}%)")
+    print(f"Losing situations: {losses} ({loss_rate:.1f}%)")
+    print(f"Average profit: {avg_profit:_.0f}")
+    print(f"Total profit: {total_profit:_.0f}")
 
-    # Статистика за стратегиите
-    print(f"\n🎯 СТРАТЕГИИ:")
+    # Strategy statistics
+    print(f"\nSTRATEGIES:")
     for strategy, count in strategy_counts.items():
         percentage = (count / iterations) * 100
-        print(f"   {strategy}: {count} пъти ({percentage:.1f}%)")
+        print(f"   {strategy}: {count} times ({percentage:.1f}%)")
 
-    # Детайлна статистика
+    # Detailed statistics
     max_profit = max(results)
     min_profit = min(results)
     positive_profits = [r for r in results if r > 100]
     avg_positive = sum(positive_profits) / len(positive_profits) if positive_profits else 0
 
-    print(f"\n📈 ДЕТАЙЛНА СТАТИСТИКА:")
-    print(f"   Макс. печалба: {max_profit:_.0f} лв")
-    print(f"   Мин. резултат: {min_profit:_.0f} лв")
-    print(f"   Средна печалба при печеливши ситуации: {avg_positive:_.0f} лв")
+    print(f"\nDETAILED STATISTICS:")
+    print(f"   Max profit: {max_profit:_.0f}")
+    print(f"   Min result: {min_profit:_.0f}")
+    print(f"   Average profit in winning situations: {avg_positive:_.0f}")
     
-    # Анализ на ефективността
+    # Effectiveness analysis
     if wins + break_even > 0:
         success_rate = ((wins + break_even) / iterations) * 100
-        print(f"   📊 Успешни операции (печалба/break-even): {success_rate:.1f}%")
+        print(f"   Successful operations (profit/break-even): {success_rate:.1f}%")
 
-    # Препоръки
-    print(f"\n💡 ПРЕПОРЪКИ:")
+    # Recommendations
+    print(f"\nRECOMMENDATIONS:")
     if win_rate > 70:
-        print("   🎉 Отлична стратегия! Висок процент на печалби.")
+        print("   Excellent strategy! High win percentage.")
     elif win_rate > 50:
-        print("   👍 Добра стратегия. Стабилни резултати.")
+        print("   Good strategy. Stable results.")
     else:
-        print("   ⚠️  Стратегията има висок риск. Препоръчително е тестване с различни коефициенти.")
+        print("   Strategy has high risk. Recommended to test with different odds.")
     
     if loss_rate < 5:
-        print("   🛡️  Ниск риск - рядко загуби.")
+        print("   Low risk - rare losses.")
     elif loss_rate < 15:
-        print("   ⚖️  Умерен риск - приемлив брой загуби.")
+        print("   Moderate risk - acceptable number of losses.")
     else:
-        print("   🚨 Висок риск - чести загуби.")
+        print("   High risk - frequent losses.")
 
-# Стартиране на симулацията
+# Start simulation
 if __name__ == "__main__":
     try:
-        iterations = int(input("Въведете брой итерации (по подразбиране 10000): ") or "10000")
+        iterations = int(input("Enter number of iterations (default 10000): ") or "10000")
         monte_carlo_hedge_simulation(iterations)
     except ValueError:
-        print("Невалиден брой итерации. Стартиране с 10000...")
+        print("Invalid number of iterations. Starting with 10000...")
         monte_carlo_hedge_simulation()
